@@ -4,17 +4,22 @@ import random
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import common
 
 fig = plt.figure()
 ax = fig.add_subplot(1, 1, 1)
 
-data_path = "../data/generated_points_final_format.csv"
-
 color_code_init_point = '#FF0000'
 color_code_next_points = '#0000FF'
 
-number_of_points_per_frame = number_of_classes = 3
-number_of_time_steps = 5
+number_of_points_per_frame = number_of_classes = common.number_of_points_per_frame
+number_of_time_steps = common.number_of_time_steps
+sigma = common.sigma # or 1e6 # increase sigma
+sigma_to_string = common.sigma_to_string
+
+display_points = False
+
+data_path_pickle = common.data_path_pickle
 
 points = probability_matrices = [[[] for i in range(number_of_points_per_frame)] for j in range(number_of_time_steps)]
 
@@ -64,12 +69,18 @@ def sort_point_per_frame(array):
 
 def generate_point_track(index):
     # Parameters for the random particle generation
-    sigma = 0.0001 # or 1e6
     theta = 0
 
-    x_generated, y_generated = 0, 0 # generate_random_particle()
+    x_generated, y_generated = random.uniform(0, 3), random.uniform(0, 3) # generate_random_particle()
     # Algorithm is based on https://en.wikipedia.org/wiki/Monte_Carlo_method_for_photon_transport?
     for i in range(number_of_time_steps):
+        colors_array = ['#3300FF', '#660033',
+                        '#333300', '#999933', '#FFCC33', '#CC6600', '#FF6600', '#CC3333', '#993333', '#996666',
+                        '#000000']
+
+        #print("Scatter index %s at time step %s" % (index, i))
+        if display_points:
+            plt.scatter(x_generated, y_generated, s=10, color=colors_array[index])
         # Eliminate 0 values for coordinates
         x_generated = 0.00001 if x_generated == 0 else x_generated
         y_generated = 0.00001 if y_generated == 0 else y_generated
@@ -106,15 +117,8 @@ def save_data():
     for i in range(number_of_points_per_frame):
         generate_point_track(i)
 
-        if i == 100:
-            print("Still generating...", i)
-
     correctly_sorted_array = [sort_point_per_frame(a) for a in points]
     generate_probability_matrices(correctly_sorted_array)
-
-    print("Array's shape", np.array(correctly_sorted_array).shape)
-    print("Sorted points\n", np.array(correctly_sorted_array))
-    print("Probability matrices:\n", np.array(probability_matrices))
 
     double_time_steps = number_of_time_steps * 2
 
@@ -129,16 +133,13 @@ def save_data():
     final_points = np.array(correctly_sorted_array).reshape((number_of_points_per_frame, double_time_steps))
     final_probabilities = np.array(correct_probability_matrices).reshape((number_of_points_per_frame, number_of_time_steps * number_of_classes))
 
-    print("Final points\n %s" % final_probabilities)
-    data_frame = pd.DataFrame(np.hstack((final_points, final_probabilities)))
-    data_frame.to_csv(data_path, header=columns_time_steps + columns_result)
+    columns = columns_time_steps + columns_result
+    data_frame = pd.DataFrame(np.hstack((final_points, final_probabilities)), columns=columns)
+    data_frame.to_pickle(data_path_pickle)
 
-arguments = sys.argv
-if len(arguments) < 2 or arguments[1] not in ["save_data"]:
-    print("> Please enter \"save_data\" parameter ")
-    sys.exit(0)
+    print("Saved successfully")
 
-if arguments[1] == "save_data":
-    save_data()
+save_data()
 
-
+if display_points:
+    plt.show()
