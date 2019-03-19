@@ -20,7 +20,8 @@ def reshape_data_correctly(data):
     frame_window_size = calculate_window_size(num_frames)
     num_samples = int(num_frames / frame_window_size)
 
-    # Assign frame_window_size in common.py
+    # Assign num_samples and frame_window_size in common.py
+    common.number_of_samples = num_samples
     common.frame_window_size = frame_window_size
 
     number_of_point_coordinates_data = common.point_coordinates * num_frames
@@ -31,6 +32,10 @@ def reshape_data_correctly(data):
 
     input_data_array = np.zeros(shape=input_shape)
     output_data_array = np.zeros(shape=output_shape)
+
+    print(output_shape)
+
+    print("NPCD", number_of_point_coordinates_data)
 
     for index, point in enumerate(data.values):
 
@@ -69,16 +74,15 @@ def reshape_data_correctly(data):
                         current_window_step = 0
                         current_sample_number += 1
 
-                output_data_array[current_sample_number, current_window_step, index, current_point_index] = value
+                if current_sample_number != num_samples:
+                    output_data_array[current_sample_number, current_window_step, index, current_point_index] = value
 
-    return input_data_array, output_data_array
+    return np.expand_dims(input_data_array, axis=4), output_data_array
 
 '''
 Split data into train/validation/test with ratio 80%/10%/10%
 '''
 def split_data(input_data, output_data, train_ratio = 0.8):
-    input_data = np.expand_dims(input_data, axis=4)
-
     train_split_ratio = train_ratio
     val_split_ratio = (1 - train_ratio) / 2
 
