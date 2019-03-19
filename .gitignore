@@ -1,3 +1,6 @@
 .idea/
 data/
 scripts/__pycache__/
+scripts/logs/
+training_checkpoint/
+assets/

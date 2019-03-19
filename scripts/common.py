@@ -2,8 +2,8 @@ import os
 import numpy as np
 
 # CAN CHANGE
-number_of_points_per_frame = number_of_classes = 20
-number_of_time_steps = 10000 # for the real
+number_of_points_per_frame = number_of_classes = 30
+number_of_time_steps = 10000 # 401 for the real
 sigma = 10.0 # or 1e6 # increase sigma
 upper_sigma = 10.0
 use_new_data = False
