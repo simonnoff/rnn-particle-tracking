@@ -4,7 +4,7 @@ import data_helper as dh
 
 number_of_points_per_frame = common.number_of_points_per_frame
 movie_number = common.movie_number
-display_points = True
+display_points = False
 
 helper = dh.DataHelper()
 

@@ -33,14 +33,14 @@ class ConvLSTMModel():
         '''
         Define the hyperparameters of the model
         '''
-        # Batch size
-        self.batch_size = 20
-
+        # CNN parameters
         self.filters = 40
         self.kernel_size = (3, 3)
 
+        # Batch size
+        self.batch_size = 20
+
         # Loss function alpha
-        self.alpha = 0.2
         self.predefined_loss_function = 'binary_crossentropy'
 
         # Learning_rate = 0.0001...0.001
@@ -62,6 +62,7 @@ class ConvLSTMModel():
         return soft
 
     def _custom_loss_function(self, y_true, y_pred):
+        self.alpha = 0.2
         print("y_true shape", y_true.shape, "y_pred shape", y_pred.shape)
         loss_1 = (1 - self.alpha) * losses.binary_crossentropy(y_true, y_pred)
         loss_2 = self.alpha * losses.binary_crossentropy(y_true, y_pred)
@@ -72,16 +73,37 @@ class ConvLSTMModel():
     def define_model(self):
         self.model = Sequential()
 
-        self.model.add(ConvLSTM2D(filters=self.filters, kernel_size=self.kernel_size, recurrent_initializer=self.recurrent_initializer, input_shape=(common.frame_window_size, common.number_of_points_per_frame, common.point_coordinates, 1), padding='same', return_sequences=True))
+        self.model.add(ConvLSTM2D(filters=self.filters,
+                                    kernel_size=self.kernel_size,
+                                    recurrent_initializer=self.recurrent_initializer,
+                                    input_shape=(common.frame_window_size,
+                                                    common.number_of_points_per_frame,
+                                                    common.point_coordinates,
+                                                    1),
+                                    padding='same',
+                                    return_sequences=True))
+
         self.model.add(BatchNormalization())
 
-        self.model.add(ConvLSTM2D(filters=self.filters, kernel_size=self.kernel_size, padding='same', return_sequences=True))
+        self.model.add(ConvLSTM2D(filters=self.filters,
+                                    kernel_size=self.kernel_size,
+                                    padding='same',
+                                    return_sequences=True))
+
         self.model.add(BatchNormalization())
 
-        self.model.add(ConvLSTM2D(filters=self.filters, kernel_size=self.kernel_size, padding='same', return_sequences=True))
+        self.model.add(ConvLSTM2D(filters=self.filters,
+                                    kernel_size=self.kernel_size,
+                                    padding='same',
+                                    return_sequences=True))
+
         self.model.add(BatchNormalization())
 
-        self.model.add(ConvLSTM2D(filters=self.filters, kernel_size=self.kernel_size, padding='same', return_sequences=True))
+        self.model.add(ConvLSTM2D(filters=self.filters,
+                                    kernel_size=self.kernel_size,
+                                    padding='same',
+                                    return_sequences=True))
+
         self.model.add(BatchNormalization())
 
         self.model.add(Flatten())
@@ -91,7 +113,6 @@ class ConvLSTMModel():
         self.model.add(final_layer)
 
         self.model.compile(loss=self.predefined_loss_function, optimizer=self.model_optimizer)
-
         self.model.summary()
 
         #print("Layer weights", final_layer.get_weights()[0].shape)
@@ -135,7 +156,7 @@ class ConvLSTMModel():
             #plt.show()
 
     def visualize(self, all_X, test_X = None):
-        samples_to_go = 1
+        samples_to_go = 2
 
         self.model.load_weights(common.checkpoint_path)
 
@@ -171,7 +192,7 @@ class ConvLSTMModel():
                     all_points_array[point_index][1][current_time] = point[1]
 
         colors_array = ['#3300FF', '#333366', '#0066CC', '#00FFFF', '#660033', '#99FF66', '#336600', '#669900', '#333300', '#999933', '#FFCC33', '#CC6600', '#FF6600', '#CC3333', '#993333', '#996666', '#000000'] * common.number_of_points_per_frame
-        for point_index in range(8):
+        for point_index in range(4):
             points = all_points_array[point_index]
             predicted_points = predicted_points_array[point_index]
             color_real = '#999933'
